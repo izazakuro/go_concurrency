@@ -26,6 +26,9 @@ var eatTime = 1 * time.Second
 var thinkTime = 3 * time.Second
 var sleepTime = 1 * time.Second
 
+var order []string
+var orderMutex sync.Mutex
+
 func main() {
 	// print out a welcome message
 	fmt.Println("Dining Philosophers Probelm")
@@ -36,6 +39,9 @@ func main() {
 	dine()
 	// print out finished message
 	fmt.Println("Table is empty.")
+	for i, name := range order {
+		fmt.Printf("%d: %s\n", i+1, name)
+	}
 
 }
 
@@ -91,11 +97,14 @@ func diningProblem(philosopher Philosopher, wg *sync.WaitGroup, forks map[int]*s
 		forks[philosopher.leftFork].Unlock()
 		forks[philosopher.rightFork].Unlock()
 
-		fmt.Printf("%s finished meal", philosopher.name)
+		fmt.Printf("%s finished meal\n", philosopher.name)
 
 	}
 
 	fmt.Println(philosopher.name, "is satisfied.")
 	fmt.Println(philosopher.name, "left the table.")
+	orderMutex.Lock()
+	order = append(order, philosopher.name)
+	orderMutex.Unlock()
 
 }
